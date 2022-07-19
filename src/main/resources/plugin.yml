@@ -1,0 +1,30 @@
+name: QuickMorph
+version: '${project.version}'
+main: fr.theskyblockman.quickmorph.QuickMorph
+api-version: 1.19
+authors: [ theskyblockman ]
+description: Make you able to Morph you into anything easily
+website: https://github.com/theskyblockman
+commands:
+  configuration:
+    aliases:
+      - conf # for linux users :)
+      - config
+    description: Edit the configuration of the plugin in-game
+    permission: quickmorph.command.config.use
+    permission-message: §cYou don't have the required permission to use this command !
+    usage: /configuration <command> <arguments>
+  morph:
+    description: Morph yourself in another entity
+    permission: quickmorph.command.morph.use
+    permission-message: §cYou don't have the required permission to use this command !
+    usage: /morph <entity> [player]
+  test:
+    description: test
+permissions:
+  quickmorph.command.config.use:
+    description: The permission to use the /config command
+    default: op
+  quickmorph.command.morph.use:
+    description: The permission to use the /morph command
+    default: not op

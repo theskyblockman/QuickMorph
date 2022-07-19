@@ -1,0 +1,48 @@
+can-morph: ["default", "op", "custom"] # custom is for custom permissions
+language: en # the language the plugin will be using
+raycast-limit: 10 # the number of blocks who are going to be checked when doing left-click, this parameter is ONLY for optimization purpose, we are moving entities asynchronously and putting too much ray casts makes a BIG performance hit!.
+# the ray cast limit will be surely be changed for a ray cast timeout
+
+default: # default group, all players have it
+  vulnerable: 'true' # Should the entity be vulnerable
+  player-vulnerable: 'false' # Should the player be vulnerable (if you want your entity health to be sync don't touch this)
+  health-linked: 'true' # Should the health of the morphing entity and the player be synchronised
+  health-owner: 'entity' # entity or player, when starting morphing use player health or the health of the entity the player will be morphed to
+  can-use-all: 'false' # can the player morph in any other entities
+  include: ["zombie", "pig"] # all the entities the player can control (only if can-use-all is equal to false)
+  can-create: 'false' # if the player can create entities to control
+  entity-loot: 'false' # Should the entity drop loot when dying
+  re-control: 0 # The number of ticks the player stays in spectator to become another entity (0 will deactivate the feature)
+  morph-others: 'false' # the ability to morph other player
+  morph-self: 'true'
+  # morph-to-player: false     WIP
+  priority: 0 # IMPORTANT TO READ the priority of the group, a player can only have 1 group at a time (because im really busy so this parameter will be changed later) we set the group of a player from this parameter, bigger priority of group the player is, upper in the list of group it will be, and the fist in that list will be the priority applied to the player
+  max-entity-distance: 15 # how far away the entity can be from the morphed player
+op: # op group all operators have it
+  vulnerable: 'false'
+  player-vulnerable: 'false'
+  health-linked: 'false'
+  health-owner: 'player'
+  can-use-all: 'true'
+  can-create: 'true'
+  entity-loot: 'true'
+  re-control: 200
+  priority: 2
+  morph-others: 'true'
+  morph-self: 'true'
+  max-entity-distance: 30
+custom:
+  com-example-morph: # permission to choose, PLEASE REPLACE THE DOTS WITH HYPHENS
+    vulnerable: 'false'
+    player-vulnerable: 'true'
+    health-linked: 'false'
+    health-owner: 'entity'
+    can-use-all: 'true'
+    exclude: ["ender_dragon", "wither"] # all the entities the player cannot control (only if can-use-all is equal to true)
+    can-create: 'false'
+    entity-loot: 'true'
+    re-control: 150
+    priority: 1
+    morph-others: 'true'
+    morph-self: 'true'
+    max-entity-distance: 20
