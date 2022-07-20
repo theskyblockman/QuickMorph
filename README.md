@@ -23,3 +23,8 @@ The player morphing is still in WIP (Work In Progress) but here's how it will wo
 
 * Player creation: create a new player that you can control
 * Player control: select a player that you want to control and with his accept you will be able to use the player
+
+## Credits
+[Theskyblockman](https://github.com/theskyblockman) - theskyblockman#2273 - theskyblockman@gmail.com - Creator
+
+[Dragonistudio](https://github.com/dragonistudio) - Packet Listener
