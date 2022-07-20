@@ -29,6 +29,7 @@ public class MorphGroup {
         -  re-control: int
         -  morph-others: boolean
         -  max-entity-distance: int
+        -  decoy: boolean
      */
     public boolean vulnerable;
     public boolean playerVulnerable;
@@ -44,6 +45,7 @@ public class MorphGroup {
     public int priority;
     public boolean morphOthers;
     public int maxEntityDistance;
+    public boolean decoy;
 
     public static Map<String, Map<String, Object>> groupArgs = new HashMap<>();
     public static Map<String, Object> argsBoolean = new HashMap<>();
@@ -68,6 +70,7 @@ public class MorphGroup {
         groupArgs.put("priority", new HashMap<>());
         groupArgs.put("morph-others", argsBoolean);
         groupArgs.put("max-entity-distance", new HashMap<>());
+        groupArgs.put("decoy", argsBoolean);
     }
 
 
@@ -90,5 +93,6 @@ public class MorphGroup {
         priority = rawSection.getInt("priority");
         morphOthers = rawSection.getBoolean("morph-others");
         maxEntityDistance = rawSection.getInt("max-entity-distance");
+        decoy = rawSection.getBoolean("decoy");
     }
 }

@@ -18,6 +18,7 @@ default: # default group, all players have it
   # morph-to-player: false     WIP
   priority: 0 # IMPORTANT TO READ the priority of the group, a player can only have 1 group at a time (because im really busy so this parameter will be changed later) we set the group of a player from this parameter, bigger priority of group the player is, upper in the list of group it will be, and the fist in that list will be the priority applied to the player
   max-entity-distance: 15 # how far away the entity can be from the morphed player
+  decoy: 'false' # does a decoy appear when the player begin his morphing to blend other peoples
 op: # op group all operators have it
   vulnerable: 'false'
   player-vulnerable: 'false'
@@ -31,6 +32,7 @@ op: # op group all operators have it
   morph-others: 'true'
   morph-self: 'true'
   max-entity-distance: 30
+  decoy: 'true'
 custom:
   com-example-morph: # permission to choose, PLEASE REPLACE THE DOTS WITH HYPHENS
     vulnerable: 'false'
@@ -46,3 +48,4 @@ custom:
     morph-others: 'true'
     morph-self: 'true'
     max-entity-distance: 20
+    decoy: 'true'

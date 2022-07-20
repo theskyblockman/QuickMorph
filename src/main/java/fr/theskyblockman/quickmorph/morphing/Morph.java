@@ -1,12 +1,21 @@
 package fr.theskyblockman.quickmorph.morphing;
 
+import com.mojang.authlib.GameProfile;
 import fr.drogonistudio.packets_listener.api.reflective.NmsReflection;
 import fr.theskyblockman.quickmorph.ActionableListener;
 import fr.theskyblockman.quickmorph.QuickMorph;
 import fr.theskyblockman.quickmorph.gui.AskStopGUI;
 import fr.theskyblockman.quickmorph.permission.MorphGroup;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.pathfinder.Path;
@@ -27,6 +36,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockIterator;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -47,6 +57,7 @@ public class Morph {
     public SoulListener soulListener;
     public boolean soulMode = false;
     public AskStopGUI askingGUI;
+    public ServerPlayer decoyNPC;
 
     public LivingEntity getEntity() {
         return (LivingEntity) Bukkit.getEntity(entityUUID);
@@ -139,6 +150,8 @@ public class Morph {
 
         removeDefaultPathfinding();
 
+        createDecoy(getPlayer());
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -150,6 +163,7 @@ public class Morph {
             }
         }.runTaskTimer(QuickMorph.instance, 1L, 40L);
     }
+
 
     public void activateListener(ActionableListener listener) {
         QuickMorph.instance.getServer().getPluginManager().registerEvents(listener, QuickMorph.instance);
@@ -240,6 +254,7 @@ public class Morph {
         getNMSEntity().collides = true;
         working = false;
         resetStatusBar();
+        deleteDecoy();
     }
 
     public void runAction(ItemStack itemStack) {
@@ -343,6 +358,52 @@ public class Morph {
             setEntityGoal(resultLoc);
         } else {
             teleportPosition((float) mixedLocations.getX(), (float) mixedLocations.getY(), (float) mixedLocations.getZ());
+        }
+    }
+
+    public ServerLevel getNMSLevel(@NotNull World world) {
+        try {
+            Object craftWorld = NmsReflection.getCraftBukkitClass("CraftWorld").cast(world);
+            return (ServerLevel) craftWorld.getClass().getDeclaredMethod("getHandle").invoke(craftWorld);
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createDecoy(Player blender) {
+        if(decoyNPC != null) return;
+        GameProfile decoyProfile = new GameProfile(UUID.randomUUID(), blender.getDisplayName());
+        MinecraftServer nmsServer = QuickMorph.getNMSServer();
+        decoyNPC = new ServerPlayer(nmsServer, getNMSLevel(blender.getWorld()), decoyProfile, null);
+        ((Player) decoyNPC.getBukkitEntity()).getPlayerProfile().setTextures(blender.getPlayerProfile().getTextures());
+        ServerPlayer nmsBlender = nmsServer.getPlayerList().getPlayer(blender.getUniqueId());
+
+        if(nmsBlender == null) return;
+
+        QuickMorph.instance.getLogger().info(nmsBlender.getGameProfile().getProperties().get("textures").toArray()[0].toString());
+        decoyNPC.getGameProfile().getProperties().removeAll("textures");
+        decoyNPC.getGameProfile().getProperties().putAll("textures", nmsBlender.getGameProfile().getProperties().get("textures"));
+        decoyNPC.moveTo(blender.getLocation().getX(), blender.getLocation().getY(), blender.getLocation().getZ(), blender.getLocation().getYaw(), blender.getLocation().getPitch());
+
+        for(Player connectedPlayer : Bukkit.getOnlinePlayers()) {
+            ServerPlayer nmsPlayer = QuickMorph.getNMSServer().getPlayerList().getPlayer(connectedPlayer.getUniqueId());
+            assert nmsPlayer != null;
+            nmsPlayer.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, decoyNPC));
+            nmsPlayer.connection.send(new ClientboundAddPlayerPacket(decoyNPC));
+            SynchedEntityData entityData = nmsPlayer.getEntityData();
+            entityData.set(new EntityDataAccessor<>(0, EntityDataSerializers.BYTE), (byte) 127);
+            nmsPlayer.connection.send(new ClientboundSetEntityDataPacket(nmsPlayer.getId(), entityData, false));
+        }
+    }
+
+    public void deleteDecoy() {
+        if(decoyNPC == null) return;
+
+        decoyNPC.disconnect();
+        for(Player connectedPlayer : Bukkit.getOnlinePlayers()) {
+            ServerPlayer nmsPlayer = QuickMorph.getNMSServer().getPlayerList().getPlayer(connectedPlayer.getUniqueId());
+            assert nmsPlayer != null;
+            nmsPlayer.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, decoyNPC));
         }
     }
 }
