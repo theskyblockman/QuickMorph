@@ -27,4 +27,4 @@ The player morphing is still in WIP (Work In Progress) but here's how it will wo
 ## Credits
 [Theskyblockman](https://github.com/theskyblockman) - theskyblockman#2273 - theskyblockman@gmail.com - Creator
 
-[Dragonistudio](https://github.com/dragonistudio) - Packet Listener
+[DrogoniEntity](https://github.com/drogonientity) - Packet Listener
